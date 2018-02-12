@@ -118,7 +118,7 @@ def getSimilares(base, usuario):
     similaridade.reverse()
     return similaridade[0:30]
 
-def getRecomendacoes(base, usuario):
+def getRecomendacoesUsuario(base, usuario):
     totais = {}
     somaSimilaridade = {}
     for outro in base:
@@ -153,5 +153,27 @@ def carregaMovieLens(path='/home/diego/projetospy/ml-100k'):
     return base
 
 
+def calculaItensSimilares(base):
+    result = {}
 
+    for item in base:
+        notas = getSimilares(base, item)
+        result[item] = notas
+    return result
+
+def getRecomendacoesItens(baseUsuario, similaridadeItens, usuario):
+    notasUsuario = baseUsuario[usuario]
+    notas = {}
+    totalSimilaridade = {}
+    for (item, nota) in notasUsuario.items():
+        for (similaridade, item2) in similaridadeItens[item]:
+            if item2 in notasUsuario: continue
+            notas.setdefault(item2, 0)
+            notas[item2] += similaridade * nota
+            totalSimilaridade.setdefault(item2, 0)
+            totalSimilaridade[item2] += similaridade
+    rankings=[(score/totalSimilaridade[item], item) for item, score in notas.items()]
+    rankings.sort()
+    rankings.reverse()
+    return rankings
 
